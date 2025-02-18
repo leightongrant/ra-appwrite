@@ -26,45 +26,70 @@ npm install ra-appwrite
 ## Usage
 
 ```jsx
-import React from "react";
-import { Appwrite } from "appwrite";
-import { AppwriteDataProvider, AppwriteAuthProvider } from "ra-appwrite";
+import { Client, Account } from 'appwrite'
 import {
-  Admin,
-  EditGuesser,
-  ListGuesser,
-  Resource,
-  ShowGuesser,
-} from "react-admin";
+	appWriteDataProvider,
+	appWriteAuthProvider,
+	LoginForm,
+} from 'ra-appwrite'
+import {
+	Admin,
+	EditGuesser,
+	ListGuesser,
+	Resource,
+	ShowGuesser,
+	Login,
+} from 'react-admin'
 
-// Init your Web SDK
-const appwrite = new Appwrite();
-
-appwrite
-  .setEndpoint("http://localhost/v1") // Your Appwrite Endpoint
-  .setProject("455x34dfkj"); // Your project ID
-
-// Create a mapping of resources to collection IDs
-const resources = {
-  movies: "6160a2ca6b6fc",
-};
+// Initialize Appwrite client
+const client = new Client()
+client
+	.setEndpoint(APPWRITE_ENDPOINT) // often https://cloud.appwrite.io/v1
+	.setProject(APPWRITE_PROJECTID)
 
 // Initialize the providers
-const dataProvider = new AppwriteDataProvider(appwrite, resources);
-const authProvider = new AppwriteAuthProvider(appwrite);
+const dataProvider = appWriteDataProvider({
+	client,
+	databaseId: APPWRITE_DATABASEID,
+	collectionIds: {
+		contacts: APPWRITE_COLLECTIONID_CONTACTS,
+		companies: APPWRITE_COLLECTIONID_COMPANIES,
+	},
+})
+
+const account = new Account(client)
+const authProvider = appWriteAuthProvider({ client, account })
+
+// custom login page with email and password instead of username and password
+const LoginPage = () => (
+	<Login>
+		<LoginForm />
+	</Login>
+)
 
 const App = (): JSX.Element => (
-  <Admin dataProvider={dataProvider} authProvider={authProvider}>
-    <Resource
-      name="movies" // Matches resources key
-      list={ListGuesser}
-      edit={EditGuesser}
-      show={ShowGuesser}
-    />
-  </Admin>
-);
+	<Admin
+		dataProvider={dataProvider}
+		authProvider={authProvider}
+		loginPage={LoginPage}
+	>
+		{/* the resource names must match the collection IDs */}
+		<Resource
+			name='contacts'
+			list={ListGuesser}
+			edit={EditGuesser}
+			show={ShowGuesser}
+		/>
+		<Resource
+			name='companies'
+			list={ListGuesser}
+			edit={EditGuesser}
+			show={ShowGuesser}
+		/>
+	</Admin>
+)
 
-export default App;
+export default App
 ```
 
 ## Roadmap
